@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Diagnóstico base Ley 21.719</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EFEB; --surface:#F5F9F6; --ink:#0D2416; --muted:#4A6355; --line:#C9D9CF;
+  --accent:#12873B; --accent-ink:#FFFFFF;
+  --ok:#1A8F45; --warn:#B7791F; --bad:#B33A3A; --na:#8A9C91;
+  --ok-bg:#DDF0E3; --warn-bg:#FBF0DC; --bad-bg:#F8E3E3;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+/* Modo oscuro desactivado: se conserva el código. Para reactivarlo, agregar class="tema-oscuro" a <html>. */
+@media (prefers-color-scheme:dark){
+  :root.tema-oscuro:not([data-theme="light"]){
+    --bg:#0B1610; --surface:#122018; --ink:#E3F1E7; --muted:#93AE9D; --line:#23382B;
+    --accent:#3DCB6F; --accent-ink:#08130C;
+    --ok:#47C877; --warn:#E0A84A; --bad:#E26D6D; --na:#7A8F82;
+    --ok-bg:#15331F; --warn-bg:#3A2C14; --bad-bg:#3A1C1C;
+    color-scheme:dark;
+  }
+}
+:root.tema-oscuro[data-theme="dark"]{
+  --bg:#0B1610; --surface:#122018; --ink:#E3F1E7; --muted:#93AE9D; --line:#23382B;
+  --accent:#3DCB6F; --accent-ink:#08130C;
+  --ok:#47C877; --warn:#E0A84A; --bad:#E26D6D; --na:#7A8F82;
+  --ok-bg:#15331F; --warn-bg:#3A2C14; --bad-bg:#3A1C1C;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Schibsted Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:72rem;margin:0 auto;padding:0 1.25rem}
+
+/* Encabezado */
+.top{padding:2.5rem 0 2rem;border-bottom:1px solid var(--line)}
+.brand{font-weight:600;color:var(--muted);margin:0 0 1.5rem;font-size:.95rem}
+.brand b{color:var(--accent)}
+h1{font-size:clamp(1.9rem,4.5vw,3.1rem);line-height:1.08;letter-spacing:-.02em;margin:0 0 1rem;max-width:20ch;font-weight:700}
+.lead{max-width:62ch;color:var(--muted);margin:0 0 1.75rem;font-size:1.08rem}
+.deadline{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;max-width:62rem}
+.deadline .days{font-size:2.6rem;font-weight:700;line-height:1;letter-spacing:-.03em;color:var(--accent);min-width:3ch}
+.deadline p{margin:0;max-width:60ch}
+.deadline small{display:block;color:var(--muted);margin-top:.35rem;font-size:.88rem}
+
+/* Datos empresa */
+.company{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:.9rem;margin:2rem 0 0}
+.company label{display:flex;flex-direction:column;gap:.3rem;font-size:.9rem;font-weight:500;color:var(--muted)}
+.company input,.company select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem;min-height:2.6rem}
+
+/* Grilla principal */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 19rem;gap:2.5rem;padding:2.5rem 0 4rem;align-items:start}
+.domain{margin:0 0 2.75rem}
+.domain-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;border-bottom:2px solid var(--ink);padding-bottom:.5rem;margin-bottom:.25rem}
+.domain h2{font-size:1.35rem;margin:0;letter-spacing:-.01em}
+.domain-head .dscore{font-weight:600;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.domain-desc{color:var(--muted);margin:.5rem 0 .5rem;max-width:65ch;font-size:.95rem}
+.q{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem 1.5rem;align-items:center;padding:1rem 0;border-bottom:1px solid var(--line)}
+.q fieldset{display:contents}
+.q legend{display:none}
+.qtext{margin:0;max-width:60ch}
+.qtext .crit{display:inline-block;font-size:.75rem;font-weight:600;color:var(--bad);border:1px solid currentColor;border-radius:4px;padding:0 .35rem;margin-left:.4rem;vertical-align:.1em}
+.qhelp{display:block;color:var(--muted);font-size:.88rem;margin-top:.2rem}
+.opts{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.opts label{position:relative;cursor:pointer}
+.opts input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opts span{display:block;padding:.5rem .75rem;font-size:.9rem;font-weight:500;border-left:1px solid var(--line);min-width:3.4rem;text-align:center;transition:background .15s,color .15s}
+.opts label:first-child span{border-left:0}
+.opts input:focus-visible + span{outline:3px solid var(--accent);outline-offset:-3px}
+.opts input:checked + span.v-si{background:var(--ok);color:#fff}
+.opts input:checked + span.v-parcial{background:var(--warn);color:#fff}
+.opts input:checked + span.v-no{background:var(--bad);color:#fff}
+.opts input:checked + span.v-na{background:var(--na);color:#fff}
+
+/* Panel lateral */
+.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 1rem);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.25rem}
+.panel h3{margin:0 0 .25rem;font-size:1rem}
+.big{font-size:3.4rem;font-weight:700;line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.level{font-weight:600;margin:.4rem 0 .2rem}
+.progress{color:var(--muted);font-size:.88rem;margin:0 0 1rem}
+.dlist{list-style:none;margin:0 0 1rem;padding:0;display:grid;gap:.55rem}
+.dlist li{font-size:.85rem}
+.dlist .row{display:flex;justify-content:space-between;gap:.5rem}
+.dlist .row span:last-child{font-variant-numeric:tabular-nums;color:var(--muted)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:.2rem}
+.bar i{display:block;height:100%;width:0;background:var(--na);transition:width .3s}
+.btn{display:inline-flex;align-items:center;justify-content:center;font:inherit;font-weight:600;border-radius:8px;padding:.65rem 1rem;cursor:pointer;text-decoration:none;border:1px solid var(--accent);min-height:2.6rem}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-ghost{background:transparent;color:var(--accent)}
+.panel .btn{width:100%;margin-top:.5rem}
+
+/* Resultados */
+.results{border-top:2px solid var(--ink);padding-top:2rem}
+.results h2{font-size:clamp(1.5rem,3vw,2.1rem);margin:0 0 .5rem;letter-spacing:-.02em}
+.summary{display:flex;gap:2rem;flex-wrap:wrap;align-items:center;margin:1.25rem 0 2rem}
+.summary .big{font-size:4.5rem}
+.summary p{margin:0;max-width:52ch}
+.footprint{display:flex;height:2.4rem;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin:0 0 .5rem}
+.footprint div{flex:1;border-left:2px solid var(--surface)}
+.footprint div:first-child{border-left:0}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;font-size:.85rem;color:var(--muted);margin:0 0 2rem}
+.legend span::before{content:"";display:inline-block;width:.8rem;height:.8rem;border-radius:2px;margin-right:.35rem;vertical-align:-.1em;background:var(--c)}
+.table-wrap{overflow-x:auto;margin:0 0 2.5rem}
+table{border-collapse:collapse;width:100%;min-width:32rem;font-size:.95rem}
+th,td{text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:.85rem}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;padding:.1rem .55rem;border-radius:999px;font-size:.8rem;font-weight:600}
+.p-bad{background:var(--bad-bg);color:var(--bad)}
+.p-warn{background:var(--warn-bg);color:var(--warn)}
+.p-ok{background:var(--ok-bg);color:var(--ok)}
+.p-na{background:var(--line);color:var(--muted)}
+.gaps{list-style:none;padding:0;margin:0 0 2rem;display:grid;gap:.75rem}
+.gaps li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;display:grid;grid-template-columns:auto minmax(0,1fr);gap:.4rem 1rem}
+.gaps .meta{color:var(--muted);font-size:.85rem}
+.gaps .q2{font-weight:600;margin:0}
+.gaps .act{margin:0;grid-column:2}
+.empty{color:var(--muted);font-style:italic}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin:0 0 2rem}
+.note{font-size:.85rem;color:var(--muted);max-width:70ch;border-top:1px solid var(--line);padding-top:1rem}
+
+/* Generar diagnóstico y flujo de revisión */
+.generate{margin:0 0 3rem;padding:1.5rem;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:10px;display:flex;gap:1rem 1.5rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.generate p{margin:0;max-width:52ch}
+.btn-lg{font-size:1.05rem;padding:.85rem 1.4rem}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+body.flow-open{overflow:hidden}
+.flow{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 1.5rem) 0 calc(env(safe-area-inset-bottom,0px) + 2rem)}
+.flow[hidden]{display:none}
+.flow-inner{max-width:52rem;margin:0 auto;padding:0 1.25rem}
+.flow-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 1.75rem}
+.steps{display:flex;gap:.5rem;list-style:none;padding:0;margin:0;font-size:.88rem;color:var(--muted);flex-wrap:wrap}
+.steps li{padding:.3rem .75rem;border:1px solid var(--line);border-radius:999px}
+.steps li[aria-current="step"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.flow h2{font-size:clamp(1.6rem,3.5vw,2.3rem);margin:0 0 .5rem;letter-spacing:-.02em}
+.flow h2:focus{outline:none}
+.flow h3{margin:2rem 0 .75rem;font-size:1.1rem}
+.rv-score{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.25rem 1.5rem;margin:1.25rem 0}
+.rv-score .big{font-size:4rem}
+.rv-score p{margin:0;max-width:48ch}
+.missing{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:1rem 1.25rem;margin:1rem 0}
+.missing ul{margin:.5rem 0 0;padding-left:1.1rem}
+.missing li{margin:.3rem 0}
+.missing p{margin:.5rem 0 0}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--accent);text-decoration:underline;cursor:pointer}
+.track{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:1.25rem 1.5rem;margin:1.5rem 0}
+.track h3{margin:0 0 .4rem}
+.track p{margin:0;max-width:60ch}
+.flow-actions{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:space-between;margin-top:2rem}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;position:relative}
+.form .full{grid-column:1/-1}
+.form label{display:flex;flex-direction:column;gap:.3rem;font-size:.9rem;font-weight:500}
+.form input,.form select,.form textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:.6rem .7rem;min-height:2.6rem}
+.form textarea{min-height:6rem;resize:vertical}
+.form .check{flex-direction:row;align-items:flex-start;gap:.6rem;font-weight:400;font-size:.88rem;color:var(--muted)}
+.form .check input{min-height:auto;margin-top:.2rem;width:1.1rem;height:1.1rem;flex:none;accent-color:var(--accent)}
+.form .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.req{color:var(--bad)}
+.form-msg{border-radius:8px;padding:.75rem 1rem;font-size:.92rem}
+.form-msg.err{background:var(--bad-bg);color:var(--bad)}
+.form-msg.warn{background:var(--warn-bg);color:var(--ink)}
+.mb-btns{display:flex;gap:.5rem;flex-wrap:wrap}
+@media (max-width:600px){.form{grid-template-columns:1fr}}
+@media (max-width:900px){.mobilebar{flex-wrap:wrap}.mobilebar .btn{padding:.5rem .8rem;font-size:.9rem;min-height:2.4rem}body{padding-bottom:7rem}}
+
+/* Barra móvil */
+.mobilebar{display:none}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .panel{display:none}
+  .mobilebar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);
+    padding:.7rem 1.25rem calc(.7rem + env(safe-area-inset-bottom,0px));align-items:center;justify-content:space-between;gap:1rem}
+  .mobilebar strong{font-size:1.4rem;font-variant-numeric:tabular-nums}
+  .mobilebar .mb-txt{font-size:.85rem;color:var(--muted);line-height:1.3}
+  body{padding-bottom:5rem}
+  .q{grid-template-columns:1fr}
+  .opts{justify-self:start}
+}
+@media (max-width:420px){.opts span{min-width:0;padding:.5rem .6rem}}
+
+@media print{
+  .panel,.mobilebar,.questions,.actions,.deadline small,.generate,.flow{display:none!important}
+  .layout{display:block;padding-top:1rem}
+  body{background:#fff;color:#000}
+  .gaps li{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="brand"><b>Dataseed</b> Diagnóstico base de protección de datos</p>
+    <h1>¿Qué tan preparada está tu empresa para la Ley 21.719?</h1>
+    <p class="lead">Responde 38 preguntas agrupadas en 10 ámbitos. Cada respuesta actualiza el puntaje al instante y, al final, obtienes un listado priorizado de brechas con acciones sugeridas.</p>
+    <div class="deadline" role="note">
+      <div class="days" id="days">–</div>
+      <p><strong id="daysText">días para la entrada en vigencia (1 de diciembre de 2026).</strong>
+        <small>Existe un proyecto de ley en el Senado que propone postergar la vigencia al 1 de diciembre de 2027. Mientras no se apruebe y publique, la fecha legal sigue siendo el 1 de diciembre de 2026.</small></p>
+    </div>
+    <div class="company" aria-label="Datos de la empresa">
+      <label>Empresa<input id="c-nombre" type="text" autocomplete="organization" placeholder="Razón social o nombre"></label>
+      <label>Rubro<input id="c-rubro" type="text" placeholder="Ej.: retail, salud, servicios"></label>
+      <label>Tamaño
+        <select id="c-tamano">
+          <option value="">Selecciona</option>
+          <option>Micro</option><option>Pequeña</option><option>Mediana</option><option>Grande</option>
+        </select>
+      </label>
+      <label>Responsable del diagnóstico<input id="c-resp" type="text" placeholder="Nombre y cargo"></label>
+      <label>Fecha<input id="c-fecha" type="date"></label>
+    </div>
+  </div>
+</header>
+
+<div class="wrap layout">
+  <main>
+    <div class="questions" id="questions"></div>
+
+    <div class="generate" id="generar">
+      <p><strong>¿Terminaste?</strong> Genera el diagnóstico para revisar tu resultado y ver el siguiente paso recomendado para tu empresa.</p>
+      <button class="btn btn-primary btn-lg js-gen" type="button">Generar diagnóstico</button>
+    </div>
+
+    <section class="results" id="resultados" aria-labelledby="res-title">
+      <h2 id="res-title">Resultado del diagnóstico</h2>
+      <p class="progress" id="resMeta"></p>
+      <div class="summary">
+        <div class="big" id="resScore">–</div>
+        <p id="resLevel">Responde al menos una pregunta para ver el resultado.</p>
+      </div>
+
+      <div class="footprint" id="footprint" aria-hidden="true"></div>
+      <div class="legend">
+        <span style="--c:var(--bad)">Inicial (menos de 40 %)</span>
+        <span style="--c:var(--warn)">En desarrollo (40 a 69 %)</span>
+        <span style="--c:var(--ok)">Avanzado o preparado (70 % o más)</span>
+        <span style="--c:var(--na)">Sin respuestas</span>
+      </div>
+
+      <h3>Puntaje por ámbito</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ámbito</th><th>Respondidas</th><th>Puntaje</th><th>Estado</th></tr></thead>
+          <tbody id="resTable"></tbody>
+        </table>
+      </div>
+
+      <h3>Brechas priorizadas</h3>
+      <ul class="gaps" id="gaps"></ul>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="button" id="printBtn">Imprimir o guardar como PDF</button>
+        <button class="btn btn-ghost" type="button" id="resetBtn">Borrar respuestas</button>
+      </div>
+
+      <p class="note">Este diagnóstico es orientativo y no constituye asesoría legal. Mide el grado de preparación frente a las principales obligaciones de la Ley 21.719 (que modifica la Ley 19.628) y no reemplaza una auditoría de cumplimiento. Las respuestas se guardan solo en este navegador.</p>
+    </section>
+  </main>
+
+  <aside class="panel" aria-label="Avance del diagnóstico">
+    <h3>Puntaje actual</h3>
+    <div class="big" id="pScore">–</div>
+    <p class="level" id="pLevel">Sin respuestas</p>
+    <p class="progress" id="pProgress">0 de 38 respondidas</p>
+    <ul class="dlist" id="pList"></ul>
+    <button class="btn btn-primary js-gen" type="button">Generar diagnóstico</button>
+    <a class="btn btn-ghost" href="#resultados">Ver resultados</a>
+  </aside>
+</div>
+
+<div class="mobilebar" aria-label="Avance del diagnóstico">
+  <div><strong id="mScore">–</strong> <span class="mb-txt" id="mTxt">0 de 38 respondidas</span></div>
+  <div class="mb-btns"><button class="btn btn-primary js-gen" type="button">Generar diagnóstico</button><a class="btn btn-ghost" href="#resultados">Resultados</a></div>
+</div>
+
+<div class="flow" id="flow" hidden role="dialog" aria-modal="true" aria-label="Diagnóstico Ley 21.719">
+  <div class="flow-inner">
+    <div class="flow-top">
+      <ol class="steps" aria-label="Pasos">
+        <li id="st-review">Revisión</li><li id="st-form">Contacto</li><li id="st-done">Confirmación</li>
+      </ol>
+      <button class="btn btn-ghost" type="button" data-close>Volver al cuestionario</button>
+    </div>
+
+    <section id="view-review"></section>
+
+    <section id="view-form" hidden>
+      <h2 tabindex="-1">Sigamos con la asesoría</h2>
+      <p class="lead">Déjanos tus datos y un especialista de Dataseed te contactará para revisar el resultado contigo.</p>
+      <div class="track" id="formTrack"></div>
+      <form class="form" id="leadForm" novalidate>
+        <label>Nombre y apellido <span class="req" aria-hidden="true">*</span><input name="nombre" required autocomplete="name"></label>
+        <label>Cargo<input name="cargo" autocomplete="organization-title"></label>
+        <label>Empresa <span class="req" aria-hidden="true">*</span><input name="empresa" required autocomplete="organization"></label>
+        <label>Correo electrónico <span class="req" aria-hidden="true">*</span><input name="email" type="email" required autocomplete="email"></label>
+        <label>Teléfono<input name="telefono" type="tel" autocomplete="tel"></label>
+        <label>¿Qué te interesa?
+          <select name="interes">
+            <option value="implementacion">Implementación integral</option>
+            <option value="brechas">Cierre de brechas</option>
+            <option value="auditoria">Auditoría y validación</option>
+            <option value="otro">Aún no lo tengo claro</option>
+          </select>
+        </label>
+        <label class="full">Comentarios<textarea name="mensaje" placeholder="Contexto, plazos o dudas puntuales"></textarea></label>
+        <label class="hp" aria-hidden="true">No completar<input name="sitio" tabindex="-1" autocomplete="off"></label>
+        <label class="check full"><input type="checkbox" name="consentimiento" required><span><span id="consentText">Autorizo a Dataseed a tratar mis datos de contacto y el resultado de este diagnóstico con el fin de contactarme por la asesoría solicitada. Puedo ejercer mis derechos o revocar esta autorización en cualquier momento.</span> <span id="privLink"></span></span></label>
+        <div class="full form-msg" id="formMsg" hidden role="alert"></div>
+        <div class="full flow-actions" style="margin-top:.5rem">
+          <button type="button" class="btn btn-ghost" id="backToReview">Volver a la revisión</button>
+          <button type="submit" class="btn btn-primary btn-lg" id="sendBtn">Enviar solicitud</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="view-done" hidden></section>
+  </div>
+</div>
+
+<script>
+const DOMAINS = [
+  {id:"gob", name:"Gobierno y responsabilidad", desc:"Quién responde por la protección de datos y cómo se organiza la empresa.", qs:[
+    {id:"g1",c:1,t:"Existe una persona o área formalmente designada como responsable de la protección de datos personales.",a:"Designar formalmente a un responsable o delegado de protección de datos, con autonomía, recursos y reporte a la alta dirección."},
+    {id:"g2",t:"La alta dirección aprobó una política interna de protección de datos personales.",a:"Redactar y aprobar una política interna que defina principios, roles y procedimientos."},
+    {id:"g3",t:"El personal que trata datos personales recibió capacitación en el último año.",a:"Implementar un plan de capacitación anual con registro de asistencia."},
+    {id:"g4",t:"Se evaluó adoptar un modelo de prevención de infracciones.",h:"Es voluntario; si está certificado, puede considerarse como atenuante.",a:"Evaluar un modelo de prevención de infracciones con delegado, matriz de riesgos y canal de reportes."}
+  ]},
+  {id:"inv", name:"Inventario de tratamientos", desc:"Saber qué datos se tratan, para qué, de quién y dónde.", qs:[
+    {id:"i1",c:1,t:"Existe un registro de los tratamientos de datos personales (qué datos, finalidad, titulares, sistemas).",a:"Levantar un registro de actividades de tratamiento por proceso y sistema."},
+    {id:"i2",t:"Están identificados los sistemas, bases de datos y planillas donde residen datos personales.",a:"Mapear sistemas, repositorios y flujos de datos, incluidas planillas y respaldos."},
+    {id:"i3",c:1,t:"Están identificados los tratamientos de datos sensibles y de niños, niñas y adolescentes.",h:"Por ejemplo: salud, biométricos, origen étnico, vida sexual u orientación.",a:"Marcar las categorías especiales y revisar su base de licitud y sus medidas reforzadas."},
+    {id:"i4",t:"El inventario se actualiza cuando cambia un proceso o se incorpora un sistema o proveedor.",a:"Asignar un dueño del inventario y gatillar su actualización ante cada cambio."}
+  ]},
+  {id:"lic", name:"Licitud y consentimiento", desc:"Cada tratamiento necesita una base legal y respetar la finalidad informada.", qs:[
+    {id:"l1",c:1,t:"Cada tratamiento tiene identificada su base de licitud (consentimiento, contrato, obligación legal, interés legítimo u otra).",a:"Documentar la base de licitud de cada tratamiento en el inventario."},
+    {id:"l2",c:1,t:"Cuando se usa consentimiento, es libre, informado, específico e inequívoco, y queda evidencia de él.",a:"Rediseñar los mecanismos de consentimiento y guardar evidencia (fecha, versión del texto y canal)."},
+    {id:"l3",t:"El titular puede revocar su consentimiento por un medio tan simple como el que usó para darlo.",a:"Habilitar una revocación simple y propagarla a todos los sistemas afectados."},
+    {id:"l4",t:"Cuando se invoca interés legítimo, existe una ponderación documentada frente a los derechos del titular.",a:"Elaborar y archivar una ponderación de interés legítimo por tratamiento."},
+    {id:"l5",t:"Los datos se usan solo para las finalidades informadas y no se recolectan más de los necesarios.",a:"Revisar formularios y bases para eliminar campos innecesarios y usos no informados."}
+  ]},
+  {id:"tra", name:"Transparencia", desc:"Lo que la empresa informa a las personas sobre el uso de sus datos.", qs:[
+    {id:"t1",c:1,t:"Existe una política de privacidad pública, actualizada a la Ley 21.719 y de fácil acceso.",a:"Publicar una política que informe responsable, finalidades, bases de licitud, destinatarios, transferencias, plazos y derechos."},
+    {id:"t2",t:"Los formularios y puntos de captura informan, al recolectar, para qué se usarán los datos.",a:"Agregar avisos de privacidad en cada punto de recolección (web, app, presencial y telefónico)."},
+    {id:"t3",t:"El uso de cookies y herramientas de seguimiento se informa y, cuando corresponde, se gestiona su aceptación.",a:"Implementar un banner y un gestor de preferencias para cookies no esenciales."}
+  ]},
+  {id:"der", name:"Derechos de los titulares", desc:"Acceso, rectificación, supresión, oposición, portabilidad y bloqueo.", qs:[
+    {id:"d1",c:1,t:"Existe un canal visible para que las personas ejerzan sus derechos sobre sus datos.",a:"Habilitar un canal (correo, formulario o portal) y publicarlo en la política de privacidad."},
+    {id:"d2",c:1,t:"Existe un procedimiento para responder dentro del plazo legal, con registro de cada solicitud.",a:"Definir el flujo, los responsables y un registro de solicitudes con control de plazos."},
+    {id:"d3",t:"Se verifica la identidad de quien solicita sin pedir más datos de los necesarios.",a:"Establecer criterios proporcionales de verificación de identidad."},
+    {id:"d4",t:"Es técnicamente posible obtener, corregir, bloquear o eliminar los datos de una persona en todos los sistemas.",a:"Probar el ejercicio de cada derecho de punta a punta en los sistemas principales y respaldos."},
+    {id:"d5",t:"Si hay decisiones automatizadas o perfilamiento, la persona puede oponerse o pedir revisión humana.",a:"Identificar decisiones automatizadas (incluida la IA) y habilitar intervención humana."}
+  ]},
+  {id:"seg", name:"Seguridad de la información", desc:"Medidas técnicas y organizativas proporcionales al riesgo.", qs:[
+    {id:"s1",c:1,t:"Existen medidas de seguridad técnicas y organizativas proporcionales al riesgo de los datos tratados.",a:"Definir un estándar mínimo de seguridad (por ejemplo, basado en ISO 27001 o CIS) y aplicarlo."},
+    {id:"s2",t:"El acceso a datos personales está restringido por rol y se revisa periódicamente.",a:"Aplicar el principio de mínimo privilegio y revisar los accesos de forma periódica."},
+    {id:"s3",t:"Los datos se cifran en tránsito y en reposo, en especial los sensibles.",a:"Habilitar cifrado en las comunicaciones y en el almacenamiento, priorizando los datos sensibles."},
+    {id:"s4",t:"Se registran los accesos y operaciones sobre datos personales.",a:"Activar la trazabilidad de accesos y conservar los registros de forma protegida."},
+    {id:"s5",t:"Existen respaldos con pruebas de restauración y un plan de continuidad.",a:"Programar respaldos y pruebas de restauración documentadas."}
+  ]},
+  {id:"inc", name:"Gestión de incidentes", desc:"Cómo se detectan, contienen y comunican las vulneraciones de seguridad.", qs:[
+    {id:"c1",c:1,t:"Existe un protocolo de respuesta ante incidentes que afecten datos personales.",a:"Aprobar un protocolo con roles, escalamiento, contención y comunicaciones."},
+    {id:"c2",c:1,t:"El protocolo contempla notificar a la Agencia sin dilaciones indebidas y, cuando corresponda, a las personas afectadas.",a:"Preparar plantillas de notificación y criterios para avisar a los titulares (por ejemplo, ante datos sensibles, de menores o financieros)."},
+    {id:"c3",t:"Se mantiene un registro de incidentes, incluso de los que no se notifican.",a:"Crear una bitácora de incidentes con hechos, efectos y medidas adoptadas."}
+  ]},
+  {id:"ter", name:"Proveedores y transferencias", desc:"Terceros que acceden a los datos y datos alojados fuera de Chile.", qs:[
+    {id:"e1",c:1,t:"Los proveedores que tratan datos por cuenta de la empresa tienen contratos con cláusulas de protección de datos.",a:"Firmar anexos de tratamiento con instrucciones, confidencialidad, seguridad, subcontratación y devolución o eliminación."},
+    {id:"e2",t:"Existe un registro de los proveedores que acceden a datos personales.",a:"Construir y mantener un registro de encargados y subencargados."},
+    {id:"e3",c:1,t:"Las transferencias internacionales (incluida la nube en el extranjero) están identificadas y cuentan con garantías adecuadas.",a:"Mapear dónde se alojan los datos y respaldar cada transferencia con un país adecuado, cláusulas contractuales u otra garantía válida."},
+    {id:"e4",t:"Las comunicaciones de datos a otras empresas tienen base de licitud y se informan al titular.",a:"Revisar las cesiones a terceros e informarlas en la política de privacidad."}
+  ]},
+  {id:"con", name:"Conservación y eliminación", desc:"Cuánto tiempo se guardan los datos y cómo se eliminan.", qs:[
+    {id:"r1",c:1,t:"Hay plazos de conservación definidos por tipo de dato o tratamiento.",a:"Definir una tabla de retención según finalidad y obligaciones legales."},
+    {id:"r2",t:"Al vencer el plazo, los datos se eliminan o anonimizan de forma verificable.",a:"Automatizar la eliminación o anonimización y dejar evidencia."}
+  ]},
+  {id:"rie", name:"Riesgos, IA y privacidad desde el diseño", desc:"Evaluación previa de tratamientos de alto riesgo y nuevas tecnologías.", qs:[
+    {id:"k1",c:1,t:"Se hace una evaluación de impacto antes de tratamientos de alto riesgo.",h:"Por ejemplo: datos sensibles a gran escala, vigilancia sistemática, perfilamiento o nuevas tecnologías.",a:"Adoptar una metodología de evaluación de impacto y aplicarla a los tratamientos de alto riesgo."},
+    {id:"k2",t:"El uso de herramientas de IA con datos personales está evaluado (qué datos se ingresan, proveedor, entrenamiento y retención).",a:"Definir una política de uso de IA y revisar los contratos de proveedores respecto de entrenamiento y retención."},
+    {id:"k3",t:"Los nuevos proyectos incorporan privacidad desde el diseño y por defecto.",a:"Agregar un checklist de privacidad al ciclo de desarrollo y de compras."}
+  ]}
+];
+const OPTS = [["si","Sí",2],["parcial","Parcial",1],["no","No",0],["na","N/A",null]];
+const TOTAL = DOMAINS.reduce((n,d)=>n+d.qs.length,0);
+const KEY = "diag-21719-v1";
+let state = {answers:{}, company:{}};
+
+function load(){ try{ const s = localStorage.getItem(KEY); if(s){ const p = JSON.parse(s); if(p && p.answers) state = {answers:p.answers, company:p.company||{}}; } }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function render(){
+  const root = document.getElementById("questions");
+  root.innerHTML = DOMAINS.map(d => `
+    <section class="domain" aria-labelledby="h-${d.id}">
+      <div class="domain-head"><h2 id="h-${d.id}">${esc(d.name)}</h2><span class="dscore" id="ds-${d.id}">–</span></div>
+      <p class="domain-desc">${esc(d.desc)}</p>
+      ${d.qs.map(q => `
+        <div class="q">
+          <p class="qtext" id="qt-${q.id}">${esc(q.t)}${q.c?'<span class="crit" title="Obligación crítica">Crítica</span>':''}${q.h?`<span class="qhelp">${esc(q.h)}</span>`:''}</p>
+          <div class="opts" role="radiogroup" aria-labelledby="qt-${q.id}">
+            ${OPTS.map(([v,l]) => `<label><input type="radio" name="${q.id}" value="${v}" ${state.answers[q.id]===v?'checked':''}><span class="v-${v}">${l}</span></label>`).join("")}
+          </div>
+        </div>`).join("")}
+    </section>`).join("");
+  root.addEventListener("change", e => {
+    if(e.target.type==="radio"){ state.answers[e.target.name]=e.target.value; save(); update(); }
+  });
+  const pl = document.getElementById("pList");
+  pl.innerHTML = DOMAINS.map(d=>`<li><div class="row"><span>${esc(d.name)}</span><span id="pl-${d.id}">–</span></div><div class="bar"><i id="pb-${d.id}"></i></div></li>`).join("");
+}
+
+function domainScore(d){
+  let pts=0, max=0, answered=0;
+  d.qs.forEach(q=>{ const a=state.answers[q.id]; if(!a) return; answered++; const o=OPTS.find(x=>x[0]===a); if(o[2]!==null){ pts+=o[2]; max+=2; } });
+  return {answered, pct: max? Math.round(pts/max*100) : null};
+}
+function levelOf(p){
+  if(p===null) return {name:"Sin respuestas", color:"var(--na)", cls:"p-na"};
+  if(p<40) return {name:"Inicial", color:"var(--bad)", cls:"p-bad"};
+  if(p<70) return {name:"En desarrollo", color:"var(--warn)", cls:"p-warn"};
+  if(p<90) return {name:"Avanzado", color:"var(--ok)", cls:"p-ok"};
+  return {name:"Preparado", color:"var(--ok)", cls:"p-ok"};
+}
+const LEVEL_TEXT = {
+  "Inicial":"La empresa tiene brechas estructurales. Conviene partir por designar un responsable, levantar el inventario de tratamientos y publicar una política de privacidad.",
+  "En desarrollo":"Hay avances, pero faltan obligaciones relevantes. Prioriza las brechas críticas marcadas abajo.",
+  "Avanzado":"La base está bien encaminada. Revisa las brechas pendientes y documenta la evidencia de cumplimiento.",
+  "Preparado":"La empresa cubre la mayoría de las obligaciones evaluadas. Mantén la evidencia actualizada y revisa periódicamente."
+};
+
+function update(){
+  let pts=0, max=0, answered=0;
+  const rows=[], foot=[];
+  DOMAINS.forEach(d=>{
+    const s = domainScore(d); answered += s.answered;
+    d.qs.forEach(q=>{ const a=state.answers[q.id]; const o=a&&OPTS.find(x=>x[0]===a); if(o && o[2]!==null){ pts+=o[2]; max+=2; } });
+    const lv = levelOf(s.pct);
+    document.getElementById("ds-"+d.id).textContent = s.pct===null ? `${s.answered}/${d.qs.length}` : `${s.pct} %`;
+    document.getElementById("pl-"+d.id).textContent = s.pct===null ? "–" : s.pct+" %";
+    const b = document.getElementById("pb-"+d.id); b.style.width=(s.pct||0)+"%"; b.style.background=lv.color;
+    rows.push(`<tr><td>${esc(d.name)}</td><td class="num">${s.answered} de ${d.qs.length}</td><td class="num">${s.pct===null?"–":s.pct+" %"}</td><td><span class="pill ${lv.cls}">${lv.name}</span></td></tr>`);
+    foot.push(`<div style="background:${lv.color}" title="${esc(d.name)}: ${s.pct===null?'sin respuestas':s.pct+' %'}"></div>`);
+  });
+  const total = max? Math.round(pts/max*100) : null;
+  const lv = levelOf(total);
+  const scoreTxt = total===null ? "–" : total+" %";
+  ["pScore","mScore","resScore"].forEach(id=>{ const el=document.getElementById(id); el.textContent=scoreTxt; el.style.color = total===null? "" : lv.color; });
+  document.getElementById("pLevel").textContent = lv.name;
+  const prog = `${answered} de ${TOTAL} respondidas`;
+  document.getElementById("pProgress").textContent = prog;
+  document.getElementById("mTxt").textContent = prog;
+  document.getElementById("resLevel").innerHTML = total===null ? "Responde al menos una pregunta para ver el resultado." : `<strong>Nivel: ${lv.name}.</strong> ${LEVEL_TEXT[lv.name]}${answered<TOTAL?` <br><em>Resultado preliminar: faltan ${TOTAL-answered} preguntas.</em>`:""}`;
+  document.getElementById("resTable").innerHTML = rows.join("");
+  document.getElementById("footprint").innerHTML = foot.join("");
+  const c = state.company;
+  const meta = [c.nombre, c.rubro, c.tamano && ("empresa "+c.tamano.toLowerCase()), c.resp && ("responsable: "+c.resp), c.fecha && ("fecha: "+c.fecha.split("-").reverse().join("-"))].filter(Boolean);
+  document.getElementById("resMeta").textContent = meta.length ? meta.join(", ") : "Completa los datos de la empresa al inicio para incluirlos en el informe.";
+
+  const gaps=[];
+  DOMAINS.forEach(d=>d.qs.forEach(q=>{
+    const a=state.answers[q.id]; if(a!=="no" && a!=="parcial") return;
+    let pr = q.c ? (a==="no"?3:2) : (a==="no"?2:1);
+    gaps.push({d,q,a,pr});
+  }));
+  gaps.sort((x,y)=>y.pr-x.pr);
+  const PR = {3:["Alta","p-bad"],2:["Media","p-warn"],1:["Baja","p-ok"]};
+  document.getElementById("gaps").innerHTML = gaps.length ? gaps.map(g=>`
+    <li><span class="pill ${PR[g.pr][1]}">${PR[g.pr][0]}</span>
+      <div><span class="meta">${esc(g.d.name)}, respuesta: ${g.a==="no"?"No":"Parcial"}${g.q.c?", obligación crítica":""}</span>
+      <p class="q2">${esc(g.q.t)}</p></div>
+      <p class="act">Acción sugerida: ${esc(g.q.a)}</p></li>`).join("")
+    : `<li class="empty" style="display:block">Aún no hay brechas registradas. Las respuestas “No” o “Parcial” aparecerán aquí, ordenadas por prioridad.</li>`;
+}
+
+function initCompany(){
+  const map = {nombre:"c-nombre", rubro:"c-rubro", tamano:"c-tamano", resp:"c-resp", fecha:"c-fecha"};
+  Object.entries(map).forEach(([k,id])=>{
+    const el=document.getElementById(id);
+    if(state.company[k]) el.value=state.company[k];
+    el.addEventListener("input", ()=>{ state.company[k]=el.value; save(); update(); });
+  });
+  if(!state.company.fecha){ const t=new Date(); const iso=new Date(t.getTime()-t.getTimezoneOffset()*60000).toISOString().slice(0,10); document.getElementById("c-fecha").value=iso; state.company.fecha=iso; }
+}
+
+function countdown(){
+  const target = new Date("2026-12-01T00:00:00-03:00");
+  const diff = Math.ceil((target - new Date())/86400000);
+  const el = document.getElementById("days"), tx = document.getElementById("daysText");
+  if(diff>0){ el.textContent = diff; tx.textContent = (diff===1?"día":"días")+" para la entrada en vigencia (1 de diciembre de 2026)."; }
+  else { el.textContent = "✓"; tx.textContent = "La Ley 21.719 está en vigencia desde el 1 de diciembre de 2026, salvo que se haya aprobado su postergación."; }
+}
+
+document.getElementById("printBtn").addEventListener("click", ()=>window.print());
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(!confirm("¿Borrar todas las respuestas y datos de la empresa de este navegador?")) return;
+  state={answers:{},company:{}}; save();
+  document.querySelectorAll("#questions input").forEach(i=>i.checked=false);
+  document.querySelectorAll(".company input, .company select").forEach(i=>i.value="");
+  initCompany(); update();
+});
+
+/* ===== Flujo: generar diagnóstico, revisión y formulario ===== */
+const CONFIG = {
+  // URL que recibe la solicitud por POST en JSON (Formspree, función de Vercel, webhook de HubSpot o Make, Supabase, etc.)
+  FORM_ENDPOINT: "",
+  // Encabezados extra que pida el destino (por ejemplo, la apikey de Supabase)
+  FORM_HEADERS: {},
+  // Enlace a la política de privacidad de Dataseed
+  PRIVACY_URL: "",
+  // Proporción mínima de preguntas respondidas para poder continuar
+  MIN_RESPUESTAS: 0.5
+};
+const TRACKS = {
+  "Inicial": {opt:"implementacion", title:"Implementación integral", text:"Tu empresa necesita construir la base del cumplimiento: responsable, inventario de tratamientos, políticas y procedimientos. Dataseed puede acompañarte con un plan de implementación de punta a punta."},
+  "En desarrollo": {opt:"brechas", title:"Cierre de brechas priorizadas", text:"Ya hay avances. El siguiente paso es cerrar las brechas críticas con un plan priorizado, responsables y plazos claros."},
+  "Avanzado": {opt:"auditoria", title:"Auditoría y validación", text:"La base está encaminada. Una auditoría permite validar la evidencia, revisar los sistemas y preparar a la empresa ante una fiscalización."},
+  "Preparado": {opt:"auditoria", title:"Auditoría y mantención del cumplimiento", text:"Tu empresa cubre la mayoría de las obligaciones evaluadas. Te ayudamos a mantener la evidencia al día y a revisar los riesgos de forma periódica."}
+};
+const PRIO = {3:["Alta","p-bad"],2:["Media","p-warn"],1:["Baja","p-ok"]};
+let lastTrigger = null, interesTocado = false;
+
+function compute(){
+  let pts=0, max=0, answered=0;
+  const doms = DOMAINS.map(d=>{
+    const s = domainScore(d); answered += s.answered;
+    d.qs.forEach(q=>{ const a=state.answers[q.id]; const o=a&&OPTS.find(x=>x[0]===a); if(o && o[2]!==null){ pts+=o[2]; max+=2; } });
+    return {d, nombre:d.name, respondidas:s.answered, total:d.qs.length, pct:s.pct};
+  });
+  const pct = max ? Math.round(pts/max*100) : null;
+  const gaps = [];
+  DOMAINS.forEach(d=>d.qs.forEach(q=>{
+    const a=state.answers[q.id]; if(a!=="no" && a!=="parcial") return;
+    gaps.push({d, q, a, pr: q.c ? (a==="no"?3:2) : (a==="no"?2:1)});
+  }));
+  gaps.sort((x,y)=>y.pr-x.pr);
+  const level = levelOf(pct);
+  return {pct, level, answered, doms, gaps, track: TRACKS[level.name] || TRACKS["Inicial"]};
+}
+
+function showView(v){
+  ["review","form","done"].forEach(x=>{
+    document.getElementById("view-"+x).hidden = x!==v;
+    const st = document.getElementById("st-"+x);
+    if(x===v) st.setAttribute("aria-current","step"); else st.removeAttribute("aria-current");
+  });
+  if(v==="review") renderReview();
+  if(v==="form") renderForm();
+  const flow = document.getElementById("flow"); flow.scrollTop = 0;
+  const h = document.querySelector("#view-"+v+" h2"); if(h) h.focus();
+}
+function openFlow(){ document.getElementById("flow").hidden=false; document.body.classList.add("flow-open"); showView("review"); }
+function closeFlow(){ document.getElementById("flow").hidden=true; document.body.classList.remove("flow-open"); if(lastTrigger) lastTrigger.focus(); }
+
+function renderReview(){
+  const r = compute();
+  const minResp = Math.ceil(TOTAL*CONFIG.MIN_RESPUESTAS);
+  const enough = r.pct!==null && r.answered >= minResp;
+  const missing = [];
+  DOMAINS.forEach(d=>d.qs.forEach(q=>{ if(!state.answers[q.id]) missing.push({d,q}); }));
+  let html = `<h2 tabindex="-1">Revisión del diagnóstico</h2>`;
+  const c = state.company;
+  html += `<p class="progress">${esc([c.nombre, c.rubro, c.tamano && ("empresa "+c.tamano.toLowerCase())].filter(Boolean).join(", ") || "Revisa tu resultado antes de continuar.")}</p>`;
+  if(r.pct!==null){
+    html += `<div class="rv-score"><div class="big" style="color:${r.level.color}">${r.pct} %</div><p><strong>Nivel: ${r.level.name}.</strong> ${LEVEL_TEXT[r.level.name]}</p></div>`;
+  }
+  if(missing.length){
+    html += `<div class="missing"><strong>Respondiste ${r.answered} de ${TOTAL} preguntas.</strong> ${enough ? "El resultado es preliminar: puedes continuar o completar lo pendiente." : `Para generar el diagnóstico, responde al menos ${minResp} preguntas.`}
+      <ul>${missing.slice(0,8).map(m=>`<li>${esc(m.d.name)}: ${esc(m.q.t)} <button type="button" class="linkbtn" data-goto="${m.q.id}">Responder</button></li>`).join("")}</ul>
+      ${missing.length>8 ? `<p>Y ${missing.length-8} preguntas más.</p>` : ""}</div>`;
+  }
+  if(r.pct!==null){
+    html += `<h3>Puntaje por ámbito</h3><div class="table-wrap"><table><thead><tr><th>Ámbito</th><th>Respondidas</th><th>Puntaje</th><th>Estado</th></tr></thead><tbody>${r.doms.map(x=>{const lv=levelOf(x.pct);return `<tr><td>${esc(x.nombre)}</td><td class="num">${x.respondidas} de ${x.total}</td><td class="num">${x.pct===null?"–":x.pct+" %"}</td><td><span class="pill ${lv.cls}">${lv.name}</span></td></tr>`;}).join("")}</tbody></table></div>`;
+    html += `<h3>Principales brechas</h3>` + (r.gaps.length ? `<ul class="gaps">${r.gaps.slice(0,5).map(g=>`<li><span class="pill ${PRIO[g.pr][1]}">${PRIO[g.pr][0]}</span><div><span class="meta">${esc(g.d.name)}</span><p class="q2">${esc(g.q.t)}</p></div></li>`).join("")}</ul>${r.gaps.length>5?`<p class="progress">El informe completo incluye ${r.gaps.length} brechas con acciones sugeridas.</p>`:""}` : `<p class="empty">No se registran brechas en las preguntas respondidas.</p>`);
+    html += `<div class="track"><h3>Siguiente paso recomendado: ${esc(r.track.title)}</h3><p>${esc(r.track.text)}</p></div>`;
+  } else {
+    html += `<div class="missing"><strong>Aún no hay respuestas.</strong> Responde el cuestionario para generar el diagnóstico.</div>`;
+  }
+  html += `<div class="flow-actions"><button type="button" class="btn btn-ghost" data-close>Volver al cuestionario</button><button type="button" class="btn btn-primary btn-lg" id="toForm" ${enough?"":"disabled"}>Continuar con la asesoría</button></div>`;
+  document.getElementById("view-review").innerHTML = html;
+}
+
+function renderForm(){
+  const r = compute();
+  document.getElementById("formTrack").innerHTML = `<h3>Con ${r.pct} % de preparación te recomendamos: ${esc(r.track.title)}</h3><p>${esc(r.track.text)}</p>`;
+  const f = document.getElementById("leadForm");
+  if(!f.elements.namedItem("empresa").value && state.company.nombre) f.elements.namedItem("empresa").value = state.company.nombre;
+  if(!interesTocado) f.elements.namedItem("interes").value = r.track.opt;
+  document.getElementById("privLink").innerHTML = CONFIG.PRIVACY_URL ? `Revisa la <a href="${esc(CONFIG.PRIVACY_URL)}" target="_blank" rel="noopener">política de privacidad</a>.` : "";
+  const msg = document.getElementById("formMsg");
+  if(!CONFIG.FORM_ENDPOINT){ msg.className="full form-msg warn"; msg.textContent="Este formulario aún no está conectado a un destino. Configura FORM_ENDPOINT en el código antes de publicarlo."; msg.hidden=false; }
+  else { msg.hidden=true; }
+}
+
+async function submitLead(e){
+  e.preventDefault();
+  const f = e.target, msg = document.getElementById("formMsg"), btn = document.getElementById("sendBtn");
+  if(!f.checkValidity()){ f.reportValidity(); return; }
+  if(f.elements.namedItem("sitio").value){ showDone(f); return; }
+  if(!CONFIG.FORM_ENDPOINT){ msg.className="full form-msg err"; msg.textContent="No se pudo enviar: el formulario no tiene un destino configurado (FORM_ENDPOINT)."; msg.hidden=false; return; }
+  const r = compute();
+  const payload = {
+    origen: "diagnostico-ley-21719", version: 1, enviado: new Date().toISOString(),
+    contacto: {nombre:f.elements.namedItem("nombre").value.trim(), cargo:f.elements.namedItem("cargo").value.trim(), empresa:f.elements.namedItem("empresa").value.trim(), email:f.elements.namedItem("email").value.trim(), telefono:f.elements.namedItem("telefono").value.trim(), interes:f.elements.namedItem("interes").value, mensaje:f.elements.namedItem("mensaje").value.trim(),
+      consentimiento: true, texto_consentimiento: document.getElementById("consentText").textContent},
+    empresa: Object.assign({}, state.company),
+    diagnostico: {puntaje:r.pct, nivel:r.level.name, ruta:r.track.opt, respondidas:r.answered, total:TOTAL, preliminar:r.answered<TOTAL,
+      ambitos: r.doms.map(x=>({ambito:x.nombre, puntaje:x.pct, respondidas:x.respondidas, total:x.total})),
+      brechas: r.gaps.map(g=>({prioridad:PRIO[g.pr][0], ambito:g.d.name, pregunta:g.q.t, respuesta:g.a, accion:g.q.a}))},
+    respuestas: Object.assign({}, state.answers)
+  };
+  btn.disabled = true; btn.textContent = "Enviando…"; msg.hidden = true;
+  try{
+    const res = await fetch(CONFIG.FORM_ENDPOINT, {method:"POST", headers:Object.assign({"Content-Type":"application/json","Accept":"application/json"}, CONFIG.FORM_HEADERS), body:JSON.stringify(payload)});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    showDone(f);
+  }catch(err){
+    msg.className="full form-msg err"; msg.textContent="No pudimos enviar la solicitud. Revisa tu conexión e inténtalo de nuevo."; msg.hidden=false;
+    console.error("Error al enviar el formulario:", err);
+  }finally{
+    btn.disabled = false; btn.textContent = "Enviar solicitud";
+  }
+}
+
+function showDone(f){
+  const nombre = f.elements.namedItem("nombre").value.trim().split(" ")[0];
+  const email = f.elements.namedItem("email").value.trim();
+  document.getElementById("view-done").innerHTML = `<h2 tabindex="-1">Solicitud enviada</h2>
+    <p class="lead">Gracias${nombre?", "+esc(nombre):""}. Un especialista de Dataseed te escribirá a ${esc(email)} para coordinar una reunión y revisar el diagnóstico contigo.</p>
+    <div class="flow-actions"><button type="button" class="btn btn-ghost" data-close>Volver al cuestionario</button><button type="button" class="btn btn-primary" id="printFromFlow">Imprimir o guardar el diagnóstico</button></div>`;
+  f.reset(); interesTocado = false;
+  showView("done");
+}
+
+function initFlow(){
+  document.querySelectorAll(".js-gen").forEach(b=>b.addEventListener("click", e=>{ lastTrigger=e.currentTarget; openFlow(); }));
+  const flow = document.getElementById("flow");
+  flow.addEventListener("click", e=>{
+    const t = e.target.closest("button"); if(!t) return;
+    if(t.hasAttribute("data-close")) closeFlow();
+    else if(t.id==="toForm" && !t.disabled) showView("form");
+    else if(t.id==="backToReview") showView("review");
+    else if(t.id==="printFromFlow"){ closeFlow(); setTimeout(()=>window.print(), 50); }
+    else if(t.dataset.goto){
+      const id = t.dataset.goto; lastTrigger = null; closeFlow();
+      const q = document.getElementById("qt-"+id);
+      if(q){ q.scrollIntoView({block:"center"}); const r = document.querySelector(`input[name="${id}"]`); if(r) r.focus({preventScroll:true}); }
+    }
+  });
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !flow.hidden) closeFlow(); });
+  const f = document.getElementById("leadForm");
+  f.addEventListener("submit", submitLead);
+  f.elements.namedItem("interes").addEventListener("change", ()=>{ interesTocado = true; });
+}
+
+load(); render(); initCompany(); countdown(); update(); initFlow();
+</script>
+</body>
+</html>
